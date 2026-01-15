@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iris's book</title>
+  <style>
+    :root{
+      --grad-main: linear-gradient(to top, #F8C8DC, #F0BEE8, #E6DAF5);
+      --grad-menu: linear-gradient(to bottom, rgb(250,218,221), rgb(216,191,216));
+      --text-dark: #4b3b4f;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--grad-main);
+      color:var(--text-dark);
+      min-height:100vh;
+    }
+    .hidden{display:none}
+
+    /* HEADER */
+    header{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(255,255,255,.25);
+      backdrop-filter:blur(8px);
+      padding:12px 16px;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    header::after{
+      content:"";position:absolute;bottom:0;left:10%;right:10%;height:1px;
+      background:linear-gradient(to right,transparent,rgba(255,255,255,.8),transparent);
+    }
+    .logo{display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}
+    .logo-circle{
+      width:28px;height:28px;border-radius:50%;
+      background:var(--grad-main);display:flex;align-items:center;justify-content:center;color:#fff
+    }
+
+    /* MENU */
+    .menu-btn{width:28px;height:22px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
+    .menu-btn span{height:3px;background:#fff;border-radius:2px;transition:.3s}
+    .menu-btn.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+    .menu-btn.active span:nth-child(2){opacity:0}
+    .menu-btn.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px)}
+    .menu-panel{
+      position:fixed;top:64px;right:16px;width:70%;max-width:260px;
+      background:var(--grad-menu);border-radius:16px;padding:16px;display:none
+    }
+    .menu-panel.active{display:block}
+
+    main{padding:16px}
+
+    /* HOME */
+    .story-card{background:rgba(255,255,255,.4);border-radius:16px;padding:12px;display:flex;gap:12px;margin-bottom:16px;cursor:pointer}
+    .story-thumb{width:70px;height:90px;border-radius:12px;background:linear-gradient(to bottom right,#f7b7d2,#d6c1f0)}
+
+    /* STORY */
+    .story-header{display:flex;gap:16px;margin-bottom:16px}
+    .story-img{width:100px;height:140px;border-radius:16px;background:#ddd}
+    .tabs{display:flex;gap:16px;margin-bottom:8px}
+    .tabs span{cursor:pointer}
+    .tabs .active{text-decoration:underline}
+    .box{background:rgba(255,255,255,.35);border-radius:16px;padding:12px;max-height:320px;overflow-y:auto}
+
+    /* CHAPTER */
+    .chapter-nav{display:flex;justify-content:center;align-items:center;gap:8px;margin:12px 0}
+    .pill{padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.5);cursor:pointer}
+    .chapter-dropdown{position:relative}
+    .chapter-list{
+      position:absolute;top:36px;left:50%;transform:translateX(-50%);
+      background:var(--grad-menu);border-radius:12px;padding:8px;
+      max-height:200px;overflow-y:auto;display:none;width:140px
+    }
+    .chapter-list div{padding:6px;text-align:center;cursor:pointer}
+
+    footer{text-align:center;padding:24px;font-size:13px;opacity:.7}
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo" onclick="goHome()">
+    <div class="logo-circle">I</div>Iris's book
+  </div>
+  <div class="menu-btn" id="menuBtn" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</header>
+<div class="menu-panel" id="menuPanel"></div>
+
+<main>
+  <section id="home"></section>
+  <section id="story" class="hidden"></section>
+  <section id="chapter" class="hidden"></section>
+</main>
+
+<footer>✦ Iris's book ✦</footer>
+
+<script>
+//phần nội dung chương
+// 1️⃣ Tạo khung 99 chương rỗng
+const defaultChapters = Array.from({ length: 99 }, (_, i) => ({
+  title: `Chương ${i + 1}`,
+  text: `
+(Chương ${i + 1} hiện chưa có nội dung)
+  `
+}));
+
+// 2️⃣ Ghi đè những chương ĐÃ VIẾT
+defaultChapters[0] = {
+  title: "Chương 1: Gặp gỡ",
+  text: `
+Nội dung chương 1 viết ở đây.
+
+Bạn có thể viết dài bao nhiêu cũng được.
+Xuống dòng thoải mái như truyện thật.
+  `
+};
+
+defaultChapters[1] = {
+  title: "Chương 2: Hắc liên hoa",
+  text: `
+Nội dung chương 2 viết ở đây.
+
+Tiểu sư đệ của ta…
+  `
+};
+
+defaultChapters[15] = {
+  title: "Chương 16: Cố Lăng Kiếm Khưu (9)",
+  text: `
+năm người kia khẽ nhếch môi, không một lời thừa thãi,
+thân hình thoắt ẩn thoắt hiện, lao thẳng về phía Vân
+Niệm với tốc độ kinh người.
+
+Vân Niệm quát: “Cứ ngồi yên đó!”
+
+Một trận pháp vô hình bao bọc lấy Tạ Khanh Lễ, khiến cậu thậm
+chí không cảm nhận được làn gió xé từ cuộc giao chiến.
+
+Cậu nhìn cô gái mảnh khảnh xông vào giữa bóng đen.
+
+Cô rất mạnh. Dù chỉ là Kim Đan, đối mặt với năm tên đại hán kia,
+cô vẫn có thể dựa vào thân pháp linh hoạt để chống đỡ.
+
+Thanh mộc kiếm trong tay cô như được thổi hồn, kiếm khí tựa rồng lượn quanh
+người, theo từng bước chân cô xuyên qua kẻ địch.
+
+Tạ Khanh Lễ nhận ra cô đang bố trận.
+
+Bề ngoài là phòng thủ, nhưng mỗi bước đi đều là một nút trận.
+
+Một kiếm tu lại còn tinh thông trận pháp.
+
+Nếu Vân Niệm nghe được suy nghĩ này, chắc sẽ buột miệng:
+
+Cảm tạ trời đất, cảm ơn Tiểu sư thúc Ôn Quan Trần của cô.
+
+Nếu không phải vì ông ta thường xuyên lôi cô đi thử nghiệm trận pháp, cô đã
+không học được những thứ này.
+
+Vân Niệm hiểu rõ, nếu chỉ dựa vào võ lực, sớm muộn cô cũng bị tiêu hao đến
+chết. Động tĩnh lúc này không nhỏ, chắc chắn không chỉ có năm tên này.
+Nếu thêm người đến, cả hai đều sẽ bị bắt.
+
+Mười sáu nút trận đã thành. Vân Niệm né đòn của một tên, thân hình lùi nhanh
+về phía Tạ Khanh Lễ.
+
+Cô niệm chú, giọng lạnh như băng: "Trận khởi!"
+
+Năm người kia nhận ra bất thường, ánh mắt biến sắc, lập tức muốn rút lui.
+Nhưng chỉ trong chớp mắt, dưới chân họ xuất hiện một vòng tròn ánh vàng rực
+rỡ, cổ xưa xoay tròn.
+
+Xung quanh bừng lên một kim chung tráo trong suốt, phù văn xoáy nhanh.
+"Kim Chung Sát Trận!”
+
+Ngay sau đó, vô số lưỡi kiếm sắc bén từ trong trận bắn ra, tiếng xé gió rít lên
+từng hồi.
+
+Vân Niệm nhân cơ hội, quay người ôm lấy Tạ Khanh Lễ và bỏ chạy.
+
+Không chạy bây giờ thì chờ đến bao giờ?
+Cô chưa chạy được bao xa, đã nghe thấy tiếng nổ kinh thiên phía sau, tiếp theo
+là một tiếng bạo phá chói tai, lửa bùng lên giữa không trung.
+
+[Không tốt, chúng đang truyền tín hiệu!]
+Vân Niệm giận dữ: “Không có võ đức!"
+Cô không thể bỏ Tạ Khanh Lễ, nhưng cứ chạy mãi cũng không phải cách. Những
+kẻ kia sớm muộn sẽ đuổi kịp.
+
+Vân Niệm nghiến chặt răng, liếc nhìn phía sau, cuối cùng quyết định.
+Cô cõng Tạ Khanh Lễ lao xuống rừng rậm, đặt cậu bé xuống giữa đám cỏ cao
+ngang lưng.
+Cô bố trí tất cả phù trận Tô Doanh cho xung quanh, đút cho cậu một viên đan
+dược ẩn khí.
+
+“Ta sẽ quay lại ngay, đệ tuyệt đối không được động đậy. Ta đi dụ chúng ra xa."
+Cô lấy cỏ khô phủ lên người Tạ Khanh Lễ, đảm bảo đã giấu kín cậu, rồi đứng dậy
+định rời đi.
+Vừa bước được một bước, Vân Niệm quay đầu nhìn lại.
+Đôi mắt đen của Tạ Khanh Lễ nhìn cô chăm chú, ánh mắt bình thản như đã nhìn
+thấu tất cả.
+
+Không sợ hãi, không tin tưởng, không một chút cảm xúc.
+Cô khựng lại, nói: “Đệ tin ta đi, ta nhất định sẽ quay về. Đừng ra ngoài.”
+Vân Niệm quay người rời đi, tà áo màu hồ lục khuất sau tán cây, khu rừng tĩnh
+lặng chỉ còn lại Tạ Khanh Lễ một mình.
+Cậu co người trong đám cỏ sâu.
+
+Tạ Khanh Lễ ngng đầu nhìn trời, thấy một vệt đỏ rực, ánh hoàng hôn nhuộm
+
+
+  `
+};
+
+    /*phần thông tin truyện ở trang chủ*/
+const stories=[{
+  title:"Tiểu Sư Đệ Hắc Liên Hoa Ngày Nào Cũng Diễn Với Ta",
+  cover: "images/truyen1.png",
+  chapters: 99,
+  desc: 'Một ngày nọ, Vân Niệm - nhân viên của Cục Xuyên Thư - nhận được nhiệm vụ đầu tiên: xuyên vào tiểu thuyết tu tiên 《Toái Kinh》 để cứu vớt nam chính Tạ Khánh Lễ, ngăn cản hắn hắc hóa, giúp hắn trở thành kiếm đạo đệ nhất, cứu độ chúng sinh. Kế hoạch rất đơn giản: gửi gắm yêu thương, làm bức tường chắn sóng gió, nuôi lớn một mỹ cường thảm nhỏ đáng thương. Mọi việc diễn ra hoàn hảo… cho đến khi nàng phát hiện ra: sư đệ ngoan hiền hóa ra chỉ là ngụy trang. Khi Vân Niệm chứng kiến Tạ Khánh Lễ tay nhuốm máu, giọng nói dịu dàng thì thầm: "Sư tỷ, tỷ định đi đâu?", nàng chỉ muốn quay đầu chạy trốn. Nhưng sợi xích bạc nơi cổ chân nhắc nàng rằng – tình yêu của hắn không có lối thoát. Từ ánh sáng chính đạo đến bóng tối tà mị, từ cứu rỗi đến bị chiếm hữu, liệu nàng có thể hoàn thành nhiệm vụ, hay lún sâu vào vòng xoáy yêu hận khó phân?',
+  content: defaultChapters
+}];
+
+let curStory=0, curChap=0;
+
+function show(page){document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));document.getElementById(page).classList.remove('hidden');}
+
+function goHome(){show('home');history.pushState({},'', '#home');}
+
+function openStory(i){curStory=i;show('story');history.pushState({},'', `#story?id=${i}`);
+  story.innerHTML=`<div class=story-header><div class=story-img></div><h2>${stories[i].title}</h2></div>
+  <div class=tabs><span class=active id=tDesc>Văn án</span><span id=tChap>Chương</span></div>
+  <div class=box id=boxDesc>${stories[i].desc}</div>
+  <div class="box hidden" id=boxChap>${stories[i].content.map((ch,c)=>`
+  <div onclick="openChapter(${c})">${ch.title}</div>`).join('')}</div>`;
+  tDesc.onclick=()=>{boxDesc.classList.remove('hidden');boxChap.classList.add('hidden');tDesc.classList.add('active');tChap.classList.remove('active');};
+  tChap.onclick=()=>{boxChap.classList.remove('hidden');boxDesc.classList.add('hidden');tChap.classList.add('active');tDesc.classList.remove('active');};
+}
+
+function openChapter(c){
+  curChap = c;
+  show('chapter');
+  history.pushState({}, '', `#chapter?id=${curStory}&c=${c}`);
+
+  const ch = stories[curStory].content[c];
+
+  chapter.innerHTML = `
+    <h3>${stories[curStory].title} – ${ch.title}</h3>
+
+    <div class="chapter-nav">
+      <div class="pill" onclick="prevChap()">Trước</div>
+
+      <div class="chapter-dropdown">
+        <div class="pill" onclick="toggleChapList()">Chương ▼</div>
+        <div class="chapter-list" id="chapList">
+          ${
+            stories[curStory].content
+              .map((item, i) => `
+                <div onclick="openChapter(${i})">
+                  ${item.title}
+                </div>
+              `)
+              .join('')
+          }
+        </div>
+      </div>
+
+      <div class="pill" onclick="nextChap()">Sau</div>
+    </div>
+
+    <div class="box">${ch.text}</div>
+  `;
+}
+
+
+function prevChap(){if(curChap>0)openChapter(curChap-1)}
+function nextChap(){if(curChap<stories[curStory].content.length-1)openChapter(curChap+1)}
+function toggleChapList(){chapList.style.display=chapList.style.display==='block'?'none':'block'}
+
+function toggleMenu(){menuBtn.classList.toggle('active');menuPanel.classList.toggle('active')}
+
+function renderHome(){home.innerHTML='';stories.forEach((s,i)=>{
+  home.innerHTML+=`<div class=story-card onclick=\"openStory(${i})\"><div class="story-thumb" style="
+  background-image: url('${s.cover}');
+  background-size: cover;
+  background-position: center;"></div><div><h4>${s.title}</h4><p>📖 ${s.chapters} chương</p></div></div>`;
+});}
+
+window.onpopstate=()=>location.reload();
+renderHome();
+</script>
+</body>
+</html>
