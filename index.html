@@ -61,7 +61,22 @@
     .tabs{display:flex;gap:16px;margin-bottom:8px}
     .tabs span{cursor:pointer}
     .tabs .active{text-decoration:underline}
-    .box{background:rgba(255,255,255,.35);border-radius:16px;padding:12px;max-height:320px;overflow-y:auto}
+    .box{
+  background: rgba(255,255,255,.35);
+  border-radius: 16px;
+  padding: 18px;
+  margin-top: 12px;
+
+  /* QUAN TRỌNG */
+  height: calc(100vh - 220px); /* chiếm phần còn lại */
+  overflow-y: auto;
+
+  /* ĐỌC TRUYỆN */
+  white-space: pre-line;
+  line-height: 1.9;
+  font-size: 18px;
+}
+
 
     /* CHAPTER */
     .chapter-nav{display:flex;justify-content:center;align-items:center;gap:8px;margin:12px 0}
@@ -73,6 +88,19 @@
       max-height:200px;overflow-y:auto;display:none;width:140px
     }
     .chapter-list div{padding:6px;text-align:center;cursor:pointer}
+    #chapter{
+  display: flex;
+  flex-direction: column;
+}
+    #chapter h3{
+        font-size: 20px;
+        text-align: center;
+        margin-top: 8px;
+        margin-bottom: 4px;
+    }
+    .box::-webkit-scrollbar{
+  width: 0;
+}
 
     footer{text-align:center;padding:24px;font-size:13px;opacity:.7}
   </style>
